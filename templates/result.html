@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="PCOS Self-Assessment Results - View your personalized health assessment">
+    <title>PCOS Assessment Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <main class="container">
+        <div class="result-header">
+            <h2>Your Assessment Results</h2>
+            <div class="result-status">
+                <span class="result-icon" role="img" aria-label="{{ 'Positive result' if result == 'PCOS Positive' else 'Negative result' }}">
+                    {{ '🌸' if result == 'PCOS Positive' else '✨' }}
+                </span>
+                <h3>{{ result }}</h3>
+            </div>
+        </div>
+
+        <div class="confidence-card">
+            <h4>Assessment Confidence</h4>
+            <div class="confidence-bar" role="progressbar" aria-valuenow="{{ probability }}" aria-valuemin="0" aria-valuemax="100">
+                <div class="confidence-fill" style="width: {{ probability }}%"></div>
+            </div>
+            <p class="confidence-value">{{ probability }}%</p>
+        </div>
+
+        <div class="summary-card">
+            <h4>Your Health Profile</h4>
+            <div class="summary-grid">
+                {% for key, value in inputs.items() %}
+                <div class="summary-item">
+                    <span class="summary-label">{{ key }}</span>
+                    <span class="summary-value">{{ value }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <a href="/" class="btn btn-secondary" aria-label="Start a new assessment">
+                <span>←</span> Start New Assessment
+            </a>
+            <button onclick="window.print()" class="btn btn-primary" aria-label="Save or print your results">
+                <span>📄</span> Save Results
+            </button>
+        </div>
+    </main>
+</body>
+</html>

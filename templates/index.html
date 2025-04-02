@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="PCOS Self-Assessment Tool - Evaluate your PCOS risk factors">
+    <title>PCOS Self-Assessment</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        function calculateBMI() {
+            const weight = parseFloat(document.getElementById('weight').value) || 0;
+            const height = parseFloat(document.getElementById('height').value) / 100 || 0;
+            if (weight > 0 && height > 0) {
+                const bmi = (weight / (height * height)).toFixed(2);
+                document.getElementById('bmi').value = bmi;
+                updateBMICategory(bmi);
+            }
+        }
+
+        function updateBMICategory(bmi) {
+            const bmiCategory = document.getElementById('bmi-category');
+            if (!bmiCategory) return;
+
+            let category = '';
+            if (bmi < 18.5) category = 'Underweight';
+            else if (bmi < 25) category = 'Normal';
+            else if (bmi < 30) category = 'Overweight';
+            else category = 'Obese';
+
+            bmiCategory.textContent = category;
+            bmiCategory.className = `bmi-category ${category.toLowerCase()}`;
+        }
+
+        function nextStep(currentStep) {
+            const currentForm = document.querySelector(`.form-step[data-step="${currentStep}"]`);
+            const nextForm = document.querySelector(`.form-step[data-step="${currentStep + 1}"]`);
+            const progressBar = document.querySelector('.progress-bar');
+            
+            if (validateStep(currentForm)) {
+                currentForm.classList.remove('active');
+                nextForm.classList.add('active');
+                progressBar.style.width = `${(currentStep / 3) * 100}%`;
+                updateStepIndicator(currentStep + 1);
+            }
+        }
+
+        function prevStep(currentStep) {
+            const currentForm = document.querySelector(`.form-step[data-step="${currentStep}"]`);
+            const prevForm = document.querySelector(`.form-step[data-step="${currentStep - 1}"]`);
+            const progressBar = document.querySelector('.progress-bar');
+            
+            currentForm.classList.remove('active');
+            prevForm.classList.add('active');
+            progressBar.style.width = `${((currentStep - 2) / 3) * 100}%`;
+            updateStepIndicator(currentStep - 1);
+        }
+
+        function validateStep(form) {
+            const inputs = form.querySelectorAll('input[required], select[required]');
+            let isValid = true;
+            
+            inputs.forEach(input => {
+                if (!input.value) {
+                    isValid = false;
+                    input.classList.add('error');
+                    const errorMessage = document.createElement('div');
+                    errorMessage.className = 'error-message';
+                    errorMessage.textContent = 'This field is required';
+                    input.parentNode.appendChild(errorMessage);
+                } else {
+                    input.classList.remove('error');
+                    const errorMessage = input.parentNode.querySelector('.error-message');
+                    if (errorMessage) {
+                        errorMessage.remove();
+                    }
+                }
+            });
+            
+            return isValid;
+        }
+
+        function updateStepIndicator(step) {
+            document.querySelectorAll('.step-indicator').forEach((indicator, index) => {
+                if (index + 1 < step) {
+                    indicator.classList.add('completed');
+                } else if (index + 1 === step) {
+                    indicator.classList.add('active');
+                } else {
+                    indicator.classList.remove('active', 'completed');
+                }
+            });
+        }
+    </script>
+</head>
+<body>
+    <main class="container">
+        <h2>PCOS Self-Assessment</h2>
+        
+        <div class="progress-container">
+            <div class="progress-bar"></div>
+            <div class="step-indicators">
+                <div class="step-indicator active">1</div>
+                <div class="step-indicator">2</div>
+                <div class="step-indicator">3</div>
+            </div>
+        </div>
+
+        <form method="POST" novalidate class="multi-step-form">
+            <!-- Step 1: Basic Information -->
+            <div class="form-step active" data-step="1">
+                <div class="form-grid">
+                    <div class="card">
+                        <label for="age">Age (years)</label>
+                        <input type="number" id="age" name="Age (yrs)" min="13" max="100" required 
+                               aria-required="true" aria-label="Age in years">
+                    </div>
+
+                    <div class="card">
+                        <label for="weight">Weight (kg)</label>
+                        <input type="number" id="weight" name="Weight (Kg)" min="30" max="300" step="0.1" required 
+                               oninput="calculateBMI()" aria-required="true" aria-label="Weight in kilograms">
+                    </div>
+
+                    <div class="card">
+                        <label for="height">Height (cm)</label>
+                        <input type="number" id="height" name="Height(Cm)" min="100" max="250" required 
+                               oninput="calculateBMI()" aria-required="true" aria-label="Height in centimeters">
+                    </div>
+
+                    <div class="card">
+                        <label for="bmi">BMI (Auto-calculated)</label>
+                        <input type="number" id="bmi" name="BMI" readonly>
+                        <span id="bmi-category" class="bmi-category"></span>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" onclick="nextStep(1)">Next →</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Cycle Information -->
+            <div class="form-step" data-step="2">
+                <div class="form-grid">
+                    <div class="card">
+                        <label for="cycle_length">Cycle Length (days)</label>
+                        <input type="number" id="cycle_length" name="Cycle length(days)" min="21" max="45" required 
+                               aria-required="true" aria-label="Menstrual cycle length in days">
+                    </div>
+
+                    <div class="card">
+                        <label for="cycle_regularity">Cycle Regularity</label>
+                        <select id="cycle_regularity" name="Cycle(R/I)" required aria-required="true">
+                            <option value="">Select an option</option>
+                            <option value="1">Regular</option>
+                            <option value="0">Irregular</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="prevStep(2)">← Back</button>
+                    <button type="button" class="btn btn-primary" onclick="nextStep(2)">Next →</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Symptoms -->
+            <div class="form-step" data-step="3">
+                <div class="form-grid">
+                    <div class="card">
+                        <label>Weight Gain</label>
+                        <div class="radio-group" role="radiogroup" aria-required="true">
+                            <label class="radio-option">
+                                <input type="radio" name="Weight gain(Y/N)" value="1" required>
+                                Yes
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="Weight gain(Y/N)" value="0" required>
+                                No
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <label>Hair Growth</label>
+                        <div class="radio-group" role="radiogroup" aria-required="true">
+                            <label class="radio-option">
+                                <input type="radio" name="hair growth(Y/N)" value="1" required>
+                                Yes
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="hair growth(Y/N)" value="0" required>
+                                No
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <label>Skin Darkening</label>
+                        <div class="radio-group" role="radiogroup" aria-required="true">
+                            <label class="radio-option">
+                                <input type="radio" name="Skin darkening (Y/N)" value="1" required>
+                                Yes
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="Skin darkening (Y/N)" value="0" required>
+                                No
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <label>Pimples</label>
+                        <div class="radio-group" role="radiogroup" aria-required="true">
+                            <label class="radio-option">
+                                <input type="radio" name="Pimples(Y/N)" value="1" required>
+                                Yes
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="Pimples(Y/N)" value="0" required>
+                                No
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="prevStep(3)">← Back</button>
+                    <button type="submit" class="btn btn-primary">Get Assessment</button>
+                </div>
+            </div>
+        </form>
+    </main>
+</body>
+</html>
+
