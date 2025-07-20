@@ -8,6 +8,10 @@ A user-friendly, multi-step web application built with Flask that allows users t
 
 ---
 
+## 📜 License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
 ## ✨ Features
 
 * **Interactive Multi-Step Form**: A guided, multi-step questionnaire that collects user health data in a structured and user-friendly manner.
@@ -102,3 +106,5 @@ Once the installation is complete, you can run the Flask development server.
 
 ```bash
 flask run
+
+
